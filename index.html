@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Disponibilités Pascal Chevrot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: une colonne étroite, un bloc par jour ouvré, créneaux en pastilles cliquables, encart de proposition en bas */
+:root{
+  --bg:#f6f7f9; --surface:#ffffff; --fg:#1c2330; --muted:#5d6676; --line:#dde1e8;
+  --accent:#1f4f8f; --accent-soft:#e6eef8; --free:#1d6b4f; --free-soft:#e3f2ec;
+  --display:"Source Serif 4",Georgia,serif; --body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12161d; --surface:#1a2029; --fg:#e7eaf0; --muted:#9aa3b2; --line:#2b333f;
+  --accent:#7fa8e0; --accent-soft:#1e2c40; --free:#6fcaa4; --free-soft:#173229; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12161d; --surface:#1a2029; --fg:#e7eaf0; --muted:#9aa3b2; --line:#2b333f;
+  --accent:#7fa8e0; --accent-soft:#1e2c40; --free:#6fcaa4; --free-soft:#173229; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:640px;margin:0 auto;padding:32px 16px 48px;display:flex;flex-direction:column;gap:24px}
+header{display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-family:var(--display);font-weight:600;font-size:28px;line-height:1.2;margin:0;text-wrap:balance}
+.lede{color:var(--muted);margin:0;max-width:60ch}
+.meta{font-size:13px;color:var(--muted)}
+.days{display:flex;flex-direction:column;gap:10px}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:150px 1fr;gap:12px;align-items:center}
+.day h2{font-size:15px;font-weight:600;margin:0}
+.day h2 small{display:block;font-weight:400;color:var(--muted);font-size:13px}
+.slots{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+.slot{font:inherit;font-size:14px;font-weight:500;font-variant-numeric:tabular-nums;border:1px solid transparent;background:var(--free-soft);color:var(--free);border-radius:999px;padding:6px 14px;cursor:pointer}
+.slot:hover{border-color:var(--free)}
+.slot:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.slot[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+.none{color:var(--muted);font-size:14px}
+.day.full{opacity:.7}
+.pick{background:var(--accent-soft);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.pick p{margin:0}
+.pick .msg{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;user-select:all}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{font:inherit;font-weight:600;font-size:14px;background:var(--accent);color:var(--surface);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
+.btn:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.mail{font-weight:600;user-select:all}
+.ok{font-size:13px;color:var(--free)}
+footer{font-size:13px;color:var(--muted)}
+@media (max-width:480px){.day{grid-template-columns:1fr;gap:8px}}
+</style>
+<style>body{margin:0}*{box-sizing:border-box}</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Prendre rendez-vous</span>
+    <h1>Mes prochaines disponibilités</h1>
+    <p class="lede">Créneaux libres d'au moins une heure, du lundi au vendredi entre 9h30 et 12h30 puis entre 14h et 18h, sur les trois prochaines semaines. Choisissez-en un pour obtenir une proposition prête à m'envoyer.</p>
+    <span class="meta" id="maj"></span>
+  </header>
+
+  <section class="days" id="days" aria-label="Disponibilités par jour"></section>
+
+  <section class="pick" aria-live="polite">
+    <p id="hint">Sélectionnez un créneau ci-dessus.</p>
+    <div class="msg" id="msg" hidden></div>
+    <div class="row" id="actions" hidden>
+      <button class="btn" id="copy" type="button">Copier la proposition</button>
+      <span>puis l'envoyer à <span class="mail">pascal.chevrot@cnrs.fr</span></span>
+      <span class="ok" id="ok" hidden>Copié</span>
+    </div>
+  </section>
+
+  <footer>Pascal Chevrot · Directeur adjoint scientifique, CNRS Terre &amp; Univers (INSU). Horaires en heure de Paris. Un créneau affiché libre reste à confirmer par retour de mail.</footer>
+</div>
+
+<script>
+// Données : créneaux libres (heure de Paris), jours ouvrés avec disponibilités uniquement.
+// La tâche quotidienne ne modifie que UPDATED et FREE.
+const UPDATED = "2026-10-06T13:54:32+02:00";
+const FREE = {"2026-10-08":[["15:00","18:00"]],"2026-10-09":[["16:00","17:00"]],"2026-10-12":[["16:30","17:30"]],"2026-10-13":[["09:30","12:30"]],"2026-10-26":[["17:00","18:00"]]};
+const fmtH = s => { const [h,m]=s.split(":"); return (+h)+"h"+(m==="00"?"":m); };
+// Dates construites à midi UTC : le jour affiché ne dépend ni du fuseau ni de l'heure d'été.
+const noon = d => new Date(d+"T12:00:00Z");
+const dayLong = new Intl.DateTimeFormat("fr-FR",{weekday:"long",day:"numeric",month:"long",timeZone:"UTC"});
+const dayName = new Intl.DateTimeFormat("fr-FR",{weekday:"long",timeZone:"UTC"});
+const dayShort = new Intl.DateTimeFormat("fr-FR",{day:"numeric",month:"long",timeZone:"UTC"});
+const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
+const todayParis = new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Paris"}).format(new Date());
+
+document.getElementById("maj").textContent = "Mis à jour le " +
+  new Intl.DateTimeFormat("fr-FR",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit",timeZone:"Europe/Paris"}).format(new Date(UPDATED)).replace(":", "h");
+
+const days = document.getElementById("days");
+let current = null;
+
+for (const [d, list] of Object.entries(FREE)) {
+  if (d <= todayParis || !list.length) continue;   // à partir du lendemain, jours avec créneaux seulement
+  const date = noon(d);
+  const art = document.createElement("article");
+  art.className = "day";
+  const h = document.createElement("h2");
+  h.innerHTML = cap(dayName.format(date)) + "<small>" + dayShort.format(date) + "</small>";
+  const box = document.createElement("div");
+  box.className = "slots";
+  for (const [a,b] of list) {
+    const hs = fmtH(a), he = fmtH(b);
+    const [ah,am]=a.split(":").map(Number), [bh,bm]=b.split(":").map(Number);
+    const long = (bh*60+bm)-(ah*60+am) > 60;
+    const btn = document.createElement("button");
+    btn.type = "button"; btn.className = "slot";
+    btn.textContent = hs + " – " + he;
+    btn.setAttribute("aria-pressed","false");
+    btn.addEventListener("click", () => {
+      if (current) current.setAttribute("aria-pressed","false");
+      btn.setAttribute("aria-pressed","true"); current = btn;
+      const txt = "Bonjour, seriez-vous disponible pour un échange d'une heure le " + dayLong.format(date) +
+        (long ? ", entre " + hs + " et " + he : ", à " + hs) + " ? Bien cordialement,";
+      document.getElementById("msg").textContent = txt;
+      document.getElementById("msg").hidden = false;
+      document.getElementById("actions").hidden = false;
+      document.getElementById("ok").hidden = true;
+      document.getElementById("hint").textContent = "Proposition pour le " + dayLong.format(date) + ", " + btn.textContent + " :";
+    });
+    box.appendChild(btn);
+  }
+  art.append(h, box);
+  days.appendChild(art);
+}
+if (!days.children.length) {
+  days.innerHTML = '<p class="none">Aucun créneau libre sur les trois prochaines semaines. Écrivez-moi directement à pascal.chevrot@cnrs.fr.</p>';
+}
+
+document.getElementById("copy").addEventListener("click", () => {
+  const el = document.getElementById("msg"), ok = document.getElementById("ok");
+  const done = () => { ok.hidden = false; };
+  try {
+    navigator.clipboard.writeText(el.textContent).then(done, () => { selectText(el); });
+  } catch(e) { selectText(el); }
+});
+function selectText(el){ const r=document.createRange(); r.selectNodeContents(el); const s=getSelection(); s.removeAllRanges(); s.addRange(r); }
+</script>
+
+</body>
+</html>
