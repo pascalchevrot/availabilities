@@ -79,8 +79,8 @@ footer{font-size:13px;color:var(--muted)}
 <script>
 // Données : créneaux libres (heure de Paris), jours ouvrés avec disponibilités uniquement.
 // La tâche quotidienne ne modifie que UPDATED et FREE.
-const UPDATED = "2026-10-20T00:14:58+02:00";
-const FREE = {"2026-10-26":[["17:00","18:00"]],"2026-10-29":[["17:00","18:00"]],"2026-11-06":[["09:30","12:30"],["17:00","18:00"]],"2026-11-09":[["17:00","18:00"]],"2026-11-10":[["14:30","18:00"]]};
+const UPDATED = "2026-10-20T11:41:14+02:00";
+const FREE = {"2026-10-26":[["17:00","18:00"]],"2026-10-29":[["17:00","18:00"]],"2026-11-06":[["09:30","12:30"],["17:00","18:00"]],"2026-11-09":[["17:00","18:00"]],"2026-11-10":[["09:30","12:30"],["14:30","18:00"]]};
 const fmtH = s => { const [h,m]=s.split(":"); return (+h)+"h"+(m==="00"?"":m); };
 // Dates construites à midi UTC : le jour affiché ne dépend ni du fuseau ni de l'heure d'été.
 const noon = d => new Date(d+"T12:00:00Z");
