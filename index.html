@@ -79,7 +79,7 @@ footer{font-size:13px;color:var(--muted)}
 <script>
 // Données : créneaux libres (heure de Paris), jours ouvrés avec disponibilités uniquement.
 // La tâche quotidienne ne modifie que UPDATED et FREE.
-const UPDATED = "2026-11-28T03:20:05+01:00";
+const UPDATED = "2026-11-28T08:28:47+01:00";
 const FREE = {"2026-11-30":[["11:00","12:30"]],"2026-12-07":[["11:30","12:30"]],"2026-12-10":[["09:30","12:00"]],"2026-12-15":[["17:00","18:00"]],"2026-12-18":[["16:00","18:00"]]};
 const fmtH = s => { const [h,m]=s.split(":"); return (+h)+"h"+(m==="00"?"":m); };
 // Dates construites à midi UTC : le jour affiché ne dépend ni du fuseau ni de l'heure d'été.
